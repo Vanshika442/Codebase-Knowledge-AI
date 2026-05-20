@@ -4,8 +4,8 @@
 
 ---
 
-## 🚀 Demo
-[Watch Demo Video]((https://youtu.be/PuISpO8i0rE))
+## 🚀 Demo VIDEO 
+https://youtu.be/PuISpO8i0rE
 
 ---
 
