@@ -84,12 +84,13 @@ cp .env.example .env
 
 5. Run app
 streamlit run app.py
-
-Future Enhancements
+---
+##Future Enhancements
 PR Reviewer using repo knowledge base
 VS Code extension integration
 Multi-repo search across microservices
 Incremental indexing on git push webhook
 GPU support for faster inference
+
 
 
