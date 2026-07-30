@@ -1,4 +1,6 @@
+import json
 import time
+from pathlib import Path
 from typing import Any, Dict, List
 
 import streamlit as st
@@ -110,6 +112,27 @@ if "last_answer" not in st.session_state:
 if "query_latency" not in st.session_state:
     st.session_state.query_latency = None
 
+# ---------- Cloud-friendly repo discovery ----------
+INDEX_META_DIR = Path("data") / "faiss"
+
+
+def list_available_repos() -> List[str]:
+    """Repos whose metadata JSONs exist (committed to GitHub)."""
+    if not INDEX_META_DIR.exists():
+        return []
+    return [
+        d.name for d in sorted(INDEX_META_DIR.iterdir())
+        if d.is_dir() and (d / "build_summary.json").exists()
+    ]
+
+
+def load_summary_from_disk(repo_id: str) -> Dict[str, Any]:
+    p = INDEX_META_DIR / repo_id / "build_summary.json"
+    if not p.exists():
+        return {}
+    with open(p, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 # ---------- Header ----------
 st.markdown('<span class="app-title">⚡ Codebase Knowledge AI</span>', unsafe_allow_html=True)
 st.markdown(
@@ -186,6 +209,7 @@ with tab_index:
         'Existing repo will be pulled if already cloned.</span>',
         unsafe_allow_html=True,
     )
+    st.caption("On the hosted demo, prefer the pre-indexed repos in the Ask Questions dropdown. Indexing here re-clones and re-uploads to Qdrant.")
 
     with st.form("index_form", clear_on_submit=False):
         repo_input = st.text_input(
@@ -219,16 +243,32 @@ with tab_query:
         unsafe_allow_html=True,
     )
 
+    available_repos = list_available_repos()
+
     q_col1, q_col2 = st.columns([3, 1])
     with q_col1:
-        repo_id = st.text_input(
-            "Repo ID",
-            value=st.session_state.repo_id,
-            placeholder="example: fetal_prediction_app",
-        )
+        if available_repos:
+            default_idx = (
+                available_repos.index(st.session_state.repo_id)
+                if st.session_state.repo_id in available_repos else 0
+            )
+            repo_id = st.selectbox("Indexed Repository", available_repos, index=default_idx)
+        else:
+            repo_id = st.text_input(
+                "Repo ID",
+                value=st.session_state.repo_id,
+                placeholder="example: fetal_prediction_app",
+            )
     with q_col2:
         st.markdown("<br/>", unsafe_allow_html=True)
         ask_btn = st.button("🔍 Run Query", use_container_width=True)
+
+    # Auto-load summary so KPIs + Details tab work without re-indexing
+    if repo_id and repo_id != st.session_state.repo_id:
+        st.session_state.repo_id = repo_id
+        disk_summary = load_summary_from_disk(repo_id)
+        if disk_summary:
+            st.session_state.index_summary = disk_summary
 
     question = st.text_area(
         "Your Question",

@@ -1,0 +1,404 @@
+{
+  "repo": "micrograd",
+  "files": [
+    {
+      "file": "setup.py",
+      "language": "python",
+      "imports": [
+        "setuptools"
+      ],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "file": "micrograd\\engine.py",
+      "language": "python",
+      "imports": [],
+      "functions": [
+        {
+          "name": "__init__",
+          "start_line": 5,
+          "end_line": 11
+        },
+        {
+          "name": "__add__",
+          "start_line": 13,
+          "end_line": 22
+        },
+        {
+          "name": "__mul__",
+          "start_line": 24,
+          "end_line": 33
+        },
+        {
+          "name": "__pow__",
+          "start_line": 35,
+          "end_line": 43
+        },
+        {
+          "name": "relu",
+          "start_line": 45,
+          "end_line": 52
+        },
+        {
+          "name": "backward",
+          "start_line": 54,
+          "end_line": 70
+        },
+        {
+          "name": "__neg__",
+          "start_line": 72,
+          "end_line": 73
+        },
+        {
+          "name": "__radd__",
+          "start_line": 75,
+          "end_line": 76
+        },
+        {
+          "name": "__sub__",
+          "start_line": 78,
+          "end_line": 79
+        },
+        {
+          "name": "__rsub__",
+          "start_line": 81,
+          "end_line": 82
+        },
+        {
+          "name": "__rmul__",
+          "start_line": 84,
+          "end_line": 85
+        },
+        {
+          "name": "__truediv__",
+          "start_line": 87,
+          "end_line": 88
+        },
+        {
+          "name": "__rtruediv__",
+          "start_line": 90,
+          "end_line": 91
+        },
+        {
+          "name": "__repr__",
+          "start_line": 93,
+          "end_line": 94
+        },
+        {
+          "name": "_backward",
+          "start_line": 17,
+          "end_line": 19
+        },
+        {
+          "name": "_backward",
+          "start_line": 28,
+          "end_line": 30
+        },
+        {
+          "name": "_backward",
+          "start_line": 39,
+          "end_line": 40
+        },
+        {
+          "name": "_backward",
+          "start_line": 48,
+          "end_line": 49
+        },
+        {
+          "name": "build_topo",
+          "start_line": 59,
+          "end_line": 64
+        }
+      ],
+      "classes": [
+        {
+          "name": "Value",
+          "start_line": 2,
+          "end_line": 94,
+          "methods": [
+            {
+              "name": "__init__",
+              "start_line": 5,
+              "end_line": 11
+            },
+            {
+              "name": "__add__",
+              "start_line": 13,
+              "end_line": 22
+            },
+            {
+              "name": "__mul__",
+              "start_line": 24,
+              "end_line": 33
+            },
+            {
+              "name": "__pow__",
+              "start_line": 35,
+              "end_line": 43
+            },
+            {
+              "name": "relu",
+              "start_line": 45,
+              "end_line": 52
+            },
+            {
+              "name": "backward",
+              "start_line": 54,
+              "end_line": 70
+            },
+            {
+              "name": "__neg__",
+              "start_line": 72,
+              "end_line": 73
+            },
+            {
+              "name": "__radd__",
+              "start_line": 75,
+              "end_line": 76
+            },
+            {
+              "name": "__sub__",
+              "start_line": 78,
+              "end_line": 79
+            },
+            {
+              "name": "__rsub__",
+              "start_line": 81,
+              "end_line": 82
+            },
+            {
+              "name": "__rmul__",
+              "start_line": 84,
+              "end_line": 85
+            },
+            {
+              "name": "__truediv__",
+              "start_line": 87,
+              "end_line": 88
+            },
+            {
+              "name": "__rtruediv__",
+              "start_line": 90,
+              "end_line": 91
+            },
+            {
+              "name": "__repr__",
+              "start_line": 93,
+              "end_line": 94
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "micrograd\\nn.py",
+      "language": "python",
+      "imports": [
+        "micrograd.engine",
+        "random"
+      ],
+      "functions": [
+        {
+          "name": "zero_grad",
+          "start_line": 6,
+          "end_line": 8
+        },
+        {
+          "name": "parameters",
+          "start_line": 10,
+          "end_line": 11
+        },
+        {
+          "name": "__init__",
+          "start_line": 15,
+          "end_line": 18
+        },
+        {
+          "name": "__call__",
+          "start_line": 20,
+          "end_line": 22
+        },
+        {
+          "name": "parameters",
+          "start_line": 24,
+          "end_line": 25
+        },
+        {
+          "name": "__repr__",
+          "start_line": 27,
+          "end_line": 28
+        },
+        {
+          "name": "__init__",
+          "start_line": 32,
+          "end_line": 33
+        },
+        {
+          "name": "__call__",
+          "start_line": 35,
+          "end_line": 37
+        },
+        {
+          "name": "parameters",
+          "start_line": 39,
+          "end_line": 40
+        },
+        {
+          "name": "__repr__",
+          "start_line": 42,
+          "end_line": 43
+        },
+        {
+          "name": "__init__",
+          "start_line": 47,
+          "end_line": 49
+        },
+        {
+          "name": "__call__",
+          "start_line": 51,
+          "end_line": 54
+        },
+        {
+          "name": "parameters",
+          "start_line": 56,
+          "end_line": 57
+        },
+        {
+          "name": "__repr__",
+          "start_line": 59,
+          "end_line": 60
+        }
+      ],
+      "classes": [
+        {
+          "name": "Module",
+          "start_line": 4,
+          "end_line": 11,
+          "methods": [
+            {
+              "name": "zero_grad",
+              "start_line": 6,
+              "end_line": 8
+            },
+            {
+              "name": "parameters",
+              "start_line": 10,
+              "end_line": 11
+            }
+          ]
+        },
+        {
+          "name": "Neuron",
+          "start_line": 13,
+          "end_line": 28,
+          "methods": [
+            {
+              "name": "__init__",
+              "start_line": 15,
+              "end_line": 18
+            },
+            {
+              "name": "__call__",
+              "start_line": 20,
+              "end_line": 22
+            },
+            {
+              "name": "parameters",
+              "start_line": 24,
+              "end_line": 25
+            },
+            {
+              "name": "__repr__",
+              "start_line": 27,
+              "end_line": 28
+            }
+          ]
+        },
+        {
+          "name": "Layer",
+          "start_line": 30,
+          "end_line": 43,
+          "methods": [
+            {
+              "name": "__init__",
+              "start_line": 32,
+              "end_line": 33
+            },
+            {
+              "name": "__call__",
+              "start_line": 35,
+              "end_line": 37
+            },
+            {
+              "name": "parameters",
+              "start_line": 39,
+              "end_line": 40
+            },
+            {
+              "name": "__repr__",
+              "start_line": 42,
+              "end_line": 43
+            }
+          ]
+        },
+        {
+          "name": "MLP",
+          "start_line": 45,
+          "end_line": 60,
+          "methods": [
+            {
+              "name": "__init__",
+              "start_line": 47,
+              "end_line": 49
+            },
+            {
+              "name": "__call__",
+              "start_line": 51,
+              "end_line": 54
+            },
+            {
+              "name": "parameters",
+              "start_line": 56,
+              "end_line": 57
+            },
+            {
+              "name": "__repr__",
+              "start_line": 59,
+              "end_line": 60
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "file": "micrograd\\__init__.py",
+      "language": "python",
+      "imports": [],
+      "functions": [],
+      "classes": []
+    },
+    {
+      "file": "test\\test_engine.py",
+      "language": "python",
+      "imports": [
+        "micrograd.engine",
+        "torch"
+      ],
+      "functions": [
+        {
+          "name": "test_sanity_check",
+          "start_line": 4,
+          "end_line": 26
+        },
+        {
+          "name": "test_more_ops",
+          "start_line": 28,
+          "end_line": 67
+        }
+      ],
+      "classes": []
+    }
+  ],
+  "total_python_files": 5
+}

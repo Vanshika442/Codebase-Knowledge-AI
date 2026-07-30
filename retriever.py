@@ -6,15 +6,20 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 from dotenv import load_dotenv
-from langchain_community.vectorstores import FAISS
+from langchain_core.documents import Document
 from langchain_huggingface import HuggingFaceEmbeddings
-from ollama import Client
+from langchain_qdrant import QdrantVectorStore
+from qdrant_client import QdrantClient
+from groq import Groq
 
 load_dotenv()
 
 FAISS_DIR = Path("data") / "faiss"
 EMBED_MODEL = os.getenv("EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:latest")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+QDRANT_URL = os.getenv("QDRANT_URL")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 TOP_K = int(os.getenv("TOP_K", "5"))
 
 
@@ -27,19 +32,52 @@ def _get_embeddings_cached(model_name: str) -> HuggingFaceEmbeddings:
     )
 
 
+@lru_cache(maxsize=1)
+def _get_qdrant_client() -> QdrantClient:
+    if not QDRANT_URL or not QDRANT_API_KEY:
+        raise RuntimeError("QDRANT_URL / QDRANT_API_KEY missing in .env")
+    return QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+
+
 @lru_cache(maxsize=4)
-def _load_vectorstore_cached(repo_id: str, model_name: str) -> FAISS:
-    repo_index_dir = FAISS_DIR / repo_id
-    if not repo_index_dir.exists():
+def _load_vectorstore_cached(repo_id: str, model_name: str) -> QdrantVectorStore:
+    client = _get_qdrant_client()
+    if not client.collection_exists(repo_id):
         raise FileNotFoundError(
-            f"Index folder not found for repo_id='{repo_id}'. Please index first."
+            f"Collection '{repo_id}' not found in Qdrant. Please index first."
         )
     embeddings = _get_embeddings_cached(model_name)
-    return FAISS.load_local(
-        str(repo_index_dir),
-        embeddings,
-        allow_dangerous_deserialization=True,
+    return QdrantVectorStore(
+        client=client,
+        collection_name=repo_id,
+        embedding=embeddings,
     )
+
+
+def _scroll_all_docs(repo_id: str) -> List[Document]:
+    """Replaces FAISS docstore scan. Works with Qdrant Cloud."""
+    client = _get_qdrant_client()
+    docs: List[Document] = []
+    offset = None
+    while True:
+        points, offset = client.scroll(
+            collection_name=repo_id,
+            with_payload=True,
+            with_vectors=False,
+            limit=1024,
+            offset=offset,
+        )
+        for p in points:
+            payload = p.payload or {}
+            text = payload.get("page_content") or payload.get("content") or ""
+            meta = payload.get("metadata")
+            if not isinstance(meta, dict):
+                meta = {k: v for k, v in payload.items()
+                        if k not in ("page_content", "content")}
+            docs.append(Document(page_content=text, metadata=meta))
+        if offset is None:
+            break
+    return docs
 
 
 def _load_repo_summary(repo_id: str) -> Dict[str, Any]:
@@ -48,6 +86,11 @@ def _load_repo_summary(repo_id: str) -> Dict[str, Any]:
         return {}
     with open(summary_path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+def _source_matches(src: str, filename: str) -> bool:
+    src_l = src.lower().replace("\\", "/")
+    fn_l = filename.lower().replace("\\", "/")
+    return src_l == fn_l or src_l.endswith("/" + fn_l)
 
 
 def _load_repo_map(repo_id: str) -> Dict[str, Any]:
@@ -249,15 +292,14 @@ def search_by_file_and_lines(
             "contexts": [],
         }
 
-    vectorstore = _load_vectorstore_cached(repo_id, EMBED_MODEL)
-    all_docs = vectorstore.docstore._dict.values()
+    all_docs = _scroll_all_docs(repo_id)
 
     matched = []
     for doc in all_docs:
         src = doc.metadata.get("source", "")
         sl = doc.metadata.get("start_line", 0)
         el = doc.metadata.get("end_line", 0)
-        if filename.lower() in src.lower():
+        if _source_matches(src, filename):
             if not (el < start_line or sl > end_line):
                 matched.append(doc)
 
@@ -361,21 +403,26 @@ def answer_question(
         "3) Citations"
     )
 
-    client = Client()
-    response = client.chat(
-        model=OLLAMA_MODEL,
+    if not GROQ_API_KEY:
+        return {
+            "answer": "GROQ_API_KEY is missing. Please set it in your .env file.",
+            "citations": [],
+            "contexts": [],
+        }
+
+    client = Groq(api_key=GROQ_API_KEY)
+    response = client.chat.completions.create(
+        model=GROQ_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        options={
-            "num_predict": 300,
-            "temperature": 0.1,
-            "top_p": 0.9,
-        },
+        temperature=0.1,
+        top_p=0.9,
+        max_tokens=500,
     )
 
-    answer = response["message"]["content"]
+    answer = response.choices[0].message.content
 
     citations = []
     seen = set()

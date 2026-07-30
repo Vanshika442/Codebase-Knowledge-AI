@@ -1,0 +1,19 @@
+{
+  "repo_id": "fetal_prediction_app",
+  "repo_path": "data\\repos\\fetal_prediction_app",
+  "total_files_in_repo": 5,
+  "files_loaded": 3,
+  "chunks_indexed": 11,
+  "binary_like_files": 2,
+  "indexed_files_list": [
+    "README.md",
+    "app.py",
+    "requirements.txt"
+  ],
+  "ast_files_parsed": 1,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "chunk_size": 900,
+  "chunk_overlap": 12,
+  "vector_db": "qdrant-cloud",
+  "collection_name": "fetal_prediction_app"
+}
