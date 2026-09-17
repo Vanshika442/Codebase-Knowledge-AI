@@ -315,4 +315,65 @@ Create a `.env` file in the project root using `.env.example` as the template.
 
 > ⚠️ **Never commit `.env` to GitHub.** Keep it in `.gitignore` and commit only `.env.example` with placeholder values.
 
+## 📁 Project Structure
+
+```text
+codebase-knowledge-ai/
+│
+├── app.py                    # Streamlit UI, indexing, Q&A and dashboard
+├── indexer.py                # Repository cloning, chunking and indexing
+├── retriever.py              # Query routing, retrieval and LLM generation
+├── ast_parser.py             # AST-based symbol extraction
+│
+├── data/
+│   └── repos/                # Local repository working copies
+│
+├── .streamlit/
+│   └── config.toml           # Streamlit configuration
+│
+├── requirements.txt          # Python dependencies
+├── .env.example              # Environment variable template
+├── .gitignore
+└── README.md
+
+
+If `repo_map.json` and `build_summary.json` are **actually generated inside your `data/` directory**, then show them there. Don't document files/directories that aren't actually in the repository.
+
+---
+
+# 6. 🌟 Key Technical Highlights
+
+This is one of the strongest sections of your README. I'd make it slightly more concise:
+
+```markdown
+## 🌟 Key Technical Highlights
+
+- **Hybrid Retrieval Architecture** — Combines MMR-based semantic search with deterministic AST symbol lookup for both semantic understanding and precise code structure.
+
+- **Language-Aware Chunking** — Uses `RecursiveCharacterTextSplitter.from_language()` to split source code according to language-specific syntax.
+
+- **Zero-LLM Fast Paths** — Stats and line-range queries are answered directly from structured metadata or vector-store retrieval without requiring an LLM call.
+
+- **Exact Line-Level Provenance** — Each code chunk stores `start_line` and `end_line` metadata, enabling precise `file:start-end` citations.
+
+- **Cloud-Native Deployment** — Uses Groq for LLM inference and Qdrant Cloud for persistent vector storage, allowing the deployed application to remain stateless.
+
+- **Per-Repository Isolation** — Each indexed repository uses a dedicated Qdrant collection to prevent cross-repository retrieval contamination.
+
+- **Metadata Sanitization** — Normalizes metadata values before vector-store upload to ensure compatibility with Qdrant payload requirements.
+
+- **Cloud Migration** — Migrated from a local Ollama + FAISS architecture to a distributed Groq + Qdrant stack, reducing typical query latency from approximately 30–60 seconds to under 5 seconds.
+
+## ⚠️ Limitations & Future Improvements
+
+| Current Limitation | Planned Improvement |
+|---|---|
+| AST symbol matching is keyword-based, so loosely related terms may occasionally appear as hints | Embed symbol names and use vector similarity for AST hint matching |
+| No incremental re-indexing — a full re-index is required after code changes | Add webhook-triggered incremental indexing using Git diffs |
+| Indexing large monorepos can be slow and memory-intensive | Use two-stage retrieval: index signatures first and fetch full bodies on demand |
+| JSON metadata is stored on local/ephemeral disk in the deployed environment | Move metadata into Qdrant payloads or a lightweight hosted database such as PostgreSQL |
+| Multi-repository querying is not supported simultaneously | Add federated search across multiple repository collections |
+| Public demo has no authentication or rate limiting | Add API authentication and rate limiting |
+| Interface is currently UI-only | Expose REST endpoints such as `/index` and `/query` through FastAPI for IDE and CI integration |
+
 
