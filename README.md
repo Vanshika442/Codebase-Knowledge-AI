@@ -1,26 +1,61 @@
 # ⚡ Codebase Knowledge AI
 
-> Chat with any codebase. Ask questions, get cited answers from source files.
+> A production-deployed RAG (Retrieval-Augmented Generation) system that lets you chat with any GitHub repository — ask architecture questions, find functions, trace logic across files — and get answers with exact file + line-number citations.
+
+🔗 **[Live Demo](https://codebase-knowledge-ai-xbfw3jsdezl34cgrdden2p.streamlit.app/)** **
 
 ---
 
-## 🚀 Demo VIDEO 
-https://youtu.be/PuISpO8i0rE
+## 🎯 Overview
+
+Onboarding into a large, unfamiliar codebase is slow and frustrating. Traditional keyword search (grep/Ctrl+F) finds text, not meaning or relationships. **Codebase Knowledge AI** solves this by combining:
+
+- **Semantic vector search** (understands *meaning*, not just keywords)
+- **AST-based structural analysis** (understands *exact* code structure — functions, classes, imports)
+- **LLM reasoning** (synthesizes both into a grounded, cited natural-language answer)
+
+The result: ask *"Where is the payment logic?"* or *"How does auth flow work across these files?"* and get a precise, source-cited answer in seconds — not hours of manual searching.
 
 ---
 
-## 📌 Overview
-A LangChain-based developer tool that indexes entire repositories 
-and answers natural language questions about code with 
-**file-level citations** and **AST-aware retrieval**.
+## ✨ Key Features
 
-Solves the **onboarding problem** in large engineering teams by 
-enabling developers to ask:
-- "Where is the payment logic?"
-- "How does auth flow work across files?"
-- "Which functions handle data preprocessing?"
+- 🔍 **Hybrid Retrieval** — combines MMR-based semantic search with deterministic AST symbol lookup
+- 📎 **File + Line-Level Citations** — every answer traces back to exact `file.py:start-end`
+- 🧠 **AST Repo Map** — extracts every function, class, method, and import with line numbers using Python's `ast` module
+- 🧩 **Language-Aware Chunking** — splits code at logical boundaries (functions/classes), not arbitrary character counts
+- 📊 **Instant Stats Answers** — file/chunk counts answered directly without an LLM call
+- 🎯 **Line-Range Search** — direct retrieval for queries like `engine.py 10-40`
+- ☁️ **Cloud-Native** — stateless app, vectors persisted in managed cloud vector DB
+- 🚫 **Hallucination-Resistant** — AST layer only surfaces symbols that actually exist in the code
+- 🌐 **Multi-Repo Support** — index and query multiple repositories independently
 
 ---
+
+## 🏗️ Architecture / Workflow
+
+```mermaid
+flowchart TD
+    A[GitHub URL or Local Path] --> B[Clone / Load Repository]
+    B --> C[Language-Aware Chunking<br/>RecursiveCharacterTextSplitter]
+    B --> D[AST Parsing<br/>Python ast module]
+    C --> E[Generate Embeddings<br/>HuggingFace all-MiniLM-L6-v2]
+    D --> F[repo_map.json<br/>functions, classes, imports + line numbers]
+    E --> G[(Qdrant Cloud<br/>Vector Database)]
+    F --> H[build_summary.json<br/>index stats]
+
+    I[User Question] --> J{Query Router}
+    J -->|Stats question| H
+    J -->|Line-range pattern| G
+    J -->|Semantic question| K[MMR Search on Qdrant]
+    K --> G
+    J -->|Semantic question| L[AST Symbol Matching]
+    L --> F
+    K --> M[Combine Context + AST Hints]
+    L --> M
+    M --> N[Groq LLM<br/>llama / gpt-oss model]
+    N --> O[Answer + Citations + AST Hints]
+    O --> P[Streamlit UI]
 
 ## 🧠 Architecture
 Codebase / GitHub URL
