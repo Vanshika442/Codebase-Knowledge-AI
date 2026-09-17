@@ -76,30 +76,20 @@ Answer with File References (path:start_line-end_line)
 
 
 ---
+## 🛠️ Tech Stack
 
-## ⚙️ Tech Stack
-| Component | Technology |
-|---|---|
-| Framework | LangChain |
-| LLM | Ollama (llama3.2 / qwen2.5-coder) |
-| Embeddings | HuggingFace sentence-transformers |
-| Vector DB | FAISS (local, CPU-friendly) |
-| AST Parsing | Python ast module |
-| UI | Streamlit |
-| Repo Loading | GitPython |
-
----
-
-## ✨ Key Features
-1. **Language-aware chunking** using `RecursiveCharacterTextSplitter.from_language()`
-2. **AST symbol extraction** - functions, classes, imports mapped per file
-3. **MMR retrieval** - reduces duplicate/irrelevant chunks
-4. **Source citations** - every answer includes `file:start_line-end_line`
-5. **Line-range search** - ask "what is in README.md between lines 10-50"
-6. **Repo stats** - total files, indexed files, binary files count
-7. **Fully local** - no OpenAI API, no cost, runs on CPU
-
----
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Frontend / UI** | Streamlit | Interactive web app — indexing, Q&A, KPI dashboard |
+| **Orchestration Framework** | LangChain | Document loading, chunking, retrieval pipeline glue |
+| **LLM Inference** | Groq API (`gpt-oss-20b`) | Fast, free-tier cloud LLM for answer generation |
+| **Vector Database** | Qdrant Cloud | Managed, persistent vector storage with MMR search |
+| **Embeddings** | HuggingFace `all-MiniLM-L6-v2` | Converts code chunks into 384-dim semantic vectors |
+| **AST Parsing** | Python `ast` module | Extracts exact function/class/import structure |
+| **Code Loading & Parsing** | tree-sitter (via LangChain `LanguageParser`) | Multi-language-aware document loading |
+| **Repo Management** | GitPython | Clone/pull GitHub repositories |
+| **Deployment** | Streamlit Community Cloud | Free, public hosting |
+| **Language** | Python 3.11 | Core implementation |
 
 ## 🏃 How To Run
 
