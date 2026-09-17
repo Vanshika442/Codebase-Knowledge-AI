@@ -315,6 +315,7 @@ Create a `.env` file in the project root using `.env.example` as the template.
 
 > ⚠️ **Never commit `.env` to GitHub.** Keep it in `.gitignore` and commit only `.env.example` with placeholder values.
 
+
 ## 📁 Project Structure
 
 ```text
@@ -335,9 +336,4 @@ codebase-knowledge-ai/
 ├── .env.example              # Environment variable template
 ├── .gitignore
 └── README.md
-
-
-If `repo_map.json` and `build_summary.json` are **actually generated inside your `data/` directory**, then show them there. Don't document files/directories that aren't actually in the repository.
-
----
 
