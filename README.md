@@ -336,4 +336,57 @@ codebase-knowledge-ai/
 ├── .env.example              # Environment variable template
 ├── .gitignore
 └── README.md
+```
+---
+
+## 🌟 Key Technical Highlights
+
+- **Hybrid Retrieval Architecture** — Combines MMR-based semantic search with deterministic AST symbol lookup for both semantic understanding and precise code structure.
+
+- **Language-Aware Chunking** — Uses `RecursiveCharacterTextSplitter.from_language()` to create retrieval-friendly code chunks based on the source language.
+
+- **Zero-LLM Fast Paths** — Stats and line-range queries can be answered directly without an LLM call, reducing unnecessary inference and latency.
+
+- **Exact Line-Level Provenance** — Code chunks store `start_line` and `end_line` metadata, enabling precise `file:start-end` citations.
+
+- **Cloud-Native Deployment** — Uses Groq for LLM inference and Qdrant Cloud for persistent vector storage.
+
+- **Per-Repository Isolation** — Each indexed repository is stored in a dedicated Qdrant collection to prevent cross-repository retrieval contamination.
+
+- **Metadata Sanitization** — Normalizes metadata before vector-store upload to ensure compatibility with Qdrant payload requirements.
+
+- **Cloud Migration** — Migrated from a local Ollama + FAISS stack to a distributed Groq + Qdrant architecture for cloud deployment and faster inference.
+
+---
+
+## ⚠️ Limitations & Future Improvements
+
+| Current Limitation | Planned Improvement |
+|---|---|
+| AST symbol matching is keyword-based | Embed symbol names and use vector similarity for AST matching |
+| Full re-indexing is required after code changes | Add webhook-triggered incremental indexing using Git diffs |
+| Large repositories can require significant indexing time and memory | Use two-stage retrieval and on-demand code loading |
+| JSON metadata uses local or ephemeral storage | Move metadata to Qdrant payloads or a lightweight hosted database |
+| Multiple repositories cannot currently be queried simultaneously | Add federated multi-repository search |
+| Public demo has no authentication or rate limiting | Add authentication and rate limiting |
+| Interface is currently UI-only | Add FastAPI endpoints for IDE and CI integration |
+
+---
+
+## 🚀 Future Improvements
+
+- 🔄 Incremental repository indexing
+- 🔍 Advanced AST and dependency analysis
+- 🕸️ Code call-graph visualization
+- 🌐 Federated multi-repository search
+- 💻 IDE integration
+- ⚡ FastAPI programmatic API
+- 🔐 Authentication and rate limiting
+- 🎯 Improved code-aware reranking
+
+---
+
+## 📄 License
+
+This project is available under the **MIT License**.
 
