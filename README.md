@@ -85,3 +85,30 @@ flowchart TD
 
     J --> Q
     Q --> R["Streamlit UI"]
+
+### 🔹 Phase 1 — Repository Indexing
+
+The indexing phase prepares the repository for intelligent code search and question answering.
+
+- **Clone & Load Repository** — GitPython clones the GitHub repository or loads a local project.
+- **Load & Filter Files** — Relevant source-code files are identified and processed.
+- **Code Chunking** — Source code is divided into meaningful, language-aware chunks.
+- **AST Parsing** — Python's `ast` module extracts functions, classes, methods, imports, and their exact line numbers.
+- **Generate Embeddings** — HuggingFace `all-MiniLM-L6-v2` converts code chunks into 384-dimensional semantic vectors.
+- **Store Vectors** — Embeddings and metadata are stored in a dedicated Qdrant Cloud collection.
+- **Build Repository Map** — `repo_map.json` stores symbols and their locations for precise code navigation.
+- **Build Summary** — `build_summary.json` stores repository and indexing statistics.
+
+### 🔹 Phase 2 — Question Answering
+
+The querying phase processes user questions and retrieves the most relevant repository information.
+
+- **User Question** — The user submits a question through the Streamlit interface.
+- **Query Router** — Classifies the question based on the required information.
+- **Stats Query** — Retrieves repository statistics directly from `build_summary.json` without using the LLM.
+- **Line-Range Query** — Retrieves the requested code directly from Qdrant.
+- **Semantic Query** — Uses MMR search to retrieve diverse and relevant code chunks.
+- **AST Symbol Matching** — Identifies exact functions, classes, methods, or imports from `repo_map.json`.
+- **Context Combination** — Combines semantic search results with AST information.
+- **LLM Generation** — Groq LLM generates a grounded answer using the retrieved repository context.
+- **Final Response** — Streamlit displays the answer along with citations, AST hints, and retrieved context.
