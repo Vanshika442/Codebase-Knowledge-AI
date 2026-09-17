@@ -54,12 +54,8 @@ The system works in two main phases: **Repository Indexing** and **Question Answ
 ```mermaid
 flowchart TD
 
-    %% =========================
-    %% PHASE 1 - INDEXING
-    %% =========================
-
     A["GitHub Repository / Local Path"] --> B["Clone / Load Repository"]
-    B --> C["Load & Filter Code Files"]
+    B --> C["Load and Filter Code Files"]
 
     C --> D["Language-Aware Code Chunking"]
     C --> E["AST Parsing"]
@@ -71,65 +67,21 @@ flowchart TD
     G --> I["repo_map.json"]
     D --> J["build_summary.json"]
 
-    %% =========================
-    %% PHASE 2 - QUERYING
-    %% =========================
-
     K["User Question"] --> L{"Query Router"}
 
-    L -->|"Stats Question"| J
-    L -->|"Line-Range Request"| H
-    L -->|"Semantic Question"| M["MMR Semantic Search"]
-    L -->|"Symbol / Function Query"| N["AST Symbol Matching"]
+    L -->|"Stats"| J
+    L -->|"Line Range"| H
+    L -->|"Semantic"| M["MMR Semantic Search"]
+    L -->|"Symbol / Function"| N["AST Symbol Matching"]
 
     M --> H
     N --> I
 
-    H --> O["Combine Retrieved Context"]
+    H --> O["Combine Context"]
     I --> O
 
     O --> P["Groq LLM"]
-    P --> Q["Grounded Answer + Citations"]
+    P --> Q["Answer and Citations"]
 
     J --> Q
     Q --> R["Streamlit UI"]
-
-    %% =========================
-    %% STYLING
-    %% =========================
-
-    classDef input fill:#e8f4fd,stroke:#3498db,stroke-width:2px
-    classDef process fill:#f4f4f4,stroke:#555,stroke-width:1.5px
-    classDef database fill:#fff3cd,stroke:#d39e00,stroke-width:2px
-    classDef output fill:#e8f8f0,stroke:#27ae60,stroke-width:2px
-
-    class A,K input
-    class B,C,D,E,F,G,L,M,N,O,P process
-    class H,I,J database
-    class Q,R output
-
-### 🔹 Phase 1 — Repository Indexing
-
-This phase runs when a repository is indexed.
-
-1. **Clone / Load Repository** — GitPython loads the GitHub repository or local project.
-2. **Load & Filter Files** — Relevant source-code files are identified.
-3. **Language-Aware Chunking** — Code is split into meaningful chunks while preserving code structure.
-4. **AST Parsing** — Python's `ast` module extracts functions, classes, methods, imports, and line numbers.
-5. **Generate Embeddings** — HuggingFace `all-MiniLM-L6-v2` converts code chunks into semantic vectors.
-6. **Store Vectors** — Embeddings and metadata are stored in a dedicated Qdrant Cloud collection.
-7. **Build Repository Metadata** — `repo_map.json` stores symbols and their exact locations, while `build_summary.json` stores indexing statistics.
-
-### 🔹 Phase 2 — Question Answering
-
-This phase runs whenever the user asks a question.
-
-1. **User Question** — The user submits a question through the Streamlit interface.
-2. **Query Router** — Determines what type of question was asked.
-3. **Stats Questions** — Retrieved directly from `build_summary.json` without using the LLM.
-4. **Line-Range Requests** — Relevant code is directly retrieved from Qdrant.
-5. **Semantic Questions** — MMR search retrieves diverse and relevant code chunks.
-6. **AST Symbol Matching** — Exact functions, classes, or imports are identified from the repository map.
-7. **Context Combination** — Semantic results and AST information are combined.
-8. **Groq LLM** — The retrieved context is passed to the LLM to generate a grounded response.
-9. **Streamlit UI** — Displays the answer, citations, AST hints, and retrieved context.
