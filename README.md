@@ -341,22 +341,3 @@ If `repo_map.json` and `build_summary.json` are **actually generated inside your
 
 ---
 
-
-```markdown
-## 🌟 Key Technical Highlights
-
-- **Hybrid Retrieval Architecture** — Combines MMR-based semantic search with deterministic AST symbol lookup for both semantic understanding and precise code structure.
-
-- **Language-Aware Chunking** — Uses `RecursiveCharacterTextSplitter.from_language()` to split source code according to language-specific syntax.
-
-- **Zero-LLM Fast Paths** — Stats and line-range queries are answered directly from structured metadata or vector-store retrieval without requiring an LLM call.
-
-- **Exact Line-Level Provenance** — Each code chunk stores `start_line` and `end_line` metadata, enabling precise `file:start-end` citations.
-
-- **Cloud-Native Deployment** — Uses Groq for LLM inference and Qdrant Cloud for persistent vector storage, allowing the deployed application to remain stateless.
-
-- **Per-Repository Isolation** — Each indexed repository uses a dedicated Qdrant collection to prevent cross-repository retrieval contamination.
-
-- **Metadata Sanitization** — Normalizes metadata values before vector-store upload to ensure compatibility with Qdrant payload requirements.
-
-- **Cloud Migration** — Migrated from a local Ollama + FAISS architecture to a distributed Groq + Qdrant stack, reducing typical query latency from approximately 30–60 seconds to under 5 seconds.
