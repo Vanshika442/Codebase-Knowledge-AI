@@ -32,6 +32,21 @@ The result: ask *"Where is the payment logic?"* or *"How does auth flow work acr
 
 ---
 
+## 🛠️ Tech Stack
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Frontend / UI** | Streamlit | Interactive web app — indexing, Q&A, KPI dashboard |
+| **Orchestration Framework** | LangChain | Document loading, chunking, retrieval pipeline glue |
+| **LLM Inference** | Groq API (`gpt-oss-20b`) | Fast, free-tier cloud LLM for answer generation |
+| **Vector Database** | Qdrant Cloud | Managed, persistent vector storage with MMR search |
+| **Embeddings** | HuggingFace `all-MiniLM-L6-v2` | Converts code chunks into 384-dim semantic vectors |
+| **AST Parsing** | Python `ast` module | Extracts exact function/class/import structure |
+| **Code Loading & Parsing** | tree-sitter (via LangChain `LanguageParser`) | Multi-language-aware document loading |
+| **Repo Management** | GitPython | Clone/pull GitHub repositories |
+| **Deployment** | Streamlit Community Cloud | Free, public hosting |
+| **Language** | Python 3.11 | Core implementation |
+
 ## 🏗️ Architecture / Workflow
 
 ```mermaid
