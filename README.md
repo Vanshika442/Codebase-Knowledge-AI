@@ -113,3 +113,206 @@ The querying phase processes user questions and retrieves the most relevant repo
 - **Context Combination** — Combines semantic search results with AST information.
 - **LLM Generation** — Groq LLM generates a grounded answer using the retrieved repository context.
 - **Final Response** — Streamlit displays the answer along with citations, AST hints, and retrieved context.
+
+## 🔄 How It Works / Retrieval Pipeline
+
+Every user question passes through a **3-way query router** before reaching the LLM. This keeps simple queries fast and avoids unnecessary LLM calls.
+
+### Query Flow
+
+```text
+User Question
+      │
+      ▼
+┌─────────────────────────────┐
+│     1. Stats Query Check    │
+│  "How many files?"          │
+└─────────────┬───────────────┘
+              │
+          Yes │
+              ▼
+     build_summary.json
+              │
+              ▼
+       Instant Response
+         (No LLM)
+              │
+          No  │
+              ▼
+┌─────────────────────────────┐
+│   2. Line-Range Check       │
+│   "engine.py 10 40"         │
+└─────────────┬───────────────┘
+              │
+          Yes │
+              ▼
+       Qdrant Retrieval
+              │
+              ▼
+        Raw Code Output
+         (No LLM)
+              │
+          No  │
+              ▼
+┌─────────────────────────────┐
+│  3. Hybrid Retrieval        │
+│                             │
+│  • MMR Semantic Search      │
+│  • AST Symbol Matching      │
+└─────────────┬───────────────┘
+              │
+              ▼
+     Combine Retrieved
+          Context
+              │
+              ▼
+       Groq LLM
+     (gpt-oss-20b)
+              │
+              ▼
+ Answer + Citations + AST Hints
+              │
+              ▼
+        Streamlit UI
+```
+
+### 🔹 1. Stats Query
+
+Questions about repository statistics are answered directly from `build_summary.json`.
+
+**Examples:**
+- "How many files are indexed?"
+- "How many chunks were created?"
+- "List indexed files."
+
+These queries do **not require an LLM call**, making them faster and cheaper.
+
+### 🔹 2. Line-Range Query
+
+For queries containing a file and line range, the system directly retrieves the requested code from Qdrant.
+
+**Example:**
+
+```text
+engine.py 10 40
+```
+
+The system returns the corresponding source code without sending the request to the LLM.
+
+### 🔹 3. Hybrid Semantic Retrieval
+
+For conceptual or code-understanding questions, the system performs two complementary retrieval operations:
+
+**MMR Semantic Search**
+- Searches code embeddings stored in Qdrant.
+- Retrieves diverse and semantically relevant code chunks.
+- Reduces near-duplicate results.
+
+**AST Symbol Matching**
+- Searches the repository's AST symbol map.
+- Identifies exact functions, classes, methods, and imports.
+- Provides precise structural information and line numbers.
+
+The retrieved semantic chunks and AST information are then combined into a structured context for the LLM.
+
+### 🔹 4. Grounded Answer Generation
+
+The combined context is passed to the **Groq `gpt-oss-20b`** model.
+
+The generated response includes:
+
+- 📄 File references
+- 📍 Exact line ranges
+- 🔗 Source citations
+- 🧠 AST-based symbol hints
+- 📦 Retrieved code context
+
+### Why This Design?
+
+- **⚡ Speed & Cost** — Stats and line-range queries bypass the LLM completely.
+- **🎯 Accuracy** — MMR provides diverse semantic results while AST matching provides deterministic structural information.
+- **🔎 Transparency** — Retrieved file and line metadata allows answers to be traced back to the source code.
+
+## 💬 Example Queries
+
+| Question | Retrieval Path | Sample Output |
+|---|---|---|
+| `How many files are indexed?` | Stats — No LLM | `"8 files indexed into 196 chunks..."` |
+| `List indexed files` | Stats — No LLM | List of indexed file paths |
+| `engine.py 1 40` | Line Range — No LLM | Raw code from `engine.py`, lines 1–40 |
+| `Where is the Value class defined?` | Hybrid + LLM | `Value` class location with file and line citations |
+| `What does backward() do?` | Hybrid + LLM | Explanation of topological sort and reverse chain rule |
+| `Which symbols relate to relu?` | Hybrid + LLM | Matching `relu` function and `Value.relu` method |
+| `How does auth flow work across these files?` | Hybrid + LLM | Cross-file explanation with multiple citations |
+
+## ⚙️ Installation & Setup
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/codebase-knowledge-ai.git
+cd codebase-knowledge-ai
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+**Windows:**
+
+```bash
+.venv\Scripts\activate
+```
+
+**macOS / Linux:**
+
+```bash
+source .venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure Environment Variables
+
+```bash
+cp .env.example .env
+```
+
+Then add your API credentials to `.env`.
+
+### 5. Run the Application
+
+```bash
+streamlit run app.py
+```
+
+The application will open at:
+
+`http://localhost:8501`
+
+Use the **Index Repository** tab to index a GitHub repository or local project, then switch to **Ask Questions** to query the codebase.
+
+## 🔐 Environment Variables
+
+Create a `.env` file in the project root using `.env.example` as the template.
+
+| Variable | Description | Example |
+|---|---|---|
+| `GROQ_API_KEY` | API key for Groq inference | `gsk_...` |
+| `GROQ_MODEL` | Groq model used for answer generation | `openai/gpt-oss-20b` |
+| `QDRANT_URL` | Qdrant Cloud cluster endpoint | `https://xxxx.aws.cloud.qdrant.io` |
+| `QDRANT_API_KEY` | Qdrant Cloud API key | `eyJhbGci...` |
+| `EMBED_MODEL` | HuggingFace embedding model | `sentence-transformers/all-MiniLM-L6-v2` |
+| `TOP_K` | Number of chunks retrieved per query | `5` |
+| `CHUNK_SIZE` | Maximum characters per code chunk | `900` |
+| `CHUNK_OVERLAP` | Overlap between consecutive chunks | `140` |
+
+> ⚠️ **Never commit `.env` to GitHub.** Keep it in `.gitignore` and commit only `.env.example` with placeholder values.
+
+
