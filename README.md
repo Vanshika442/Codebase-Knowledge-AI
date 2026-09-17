@@ -69,10 +69,10 @@ flowchart TD
 
     K["User Question"] --> L{"Query Router"}
 
-    L -->|"Stats"| J
-    L -->|"Line Range"| H
-    L -->|"Semantic"| M["MMR Semantic Search"]
-    L -->|"Symbol / Function"| N["AST Symbol Matching"]
+    L -->|Stats| J
+    L -->|Line Range| H
+    L -->|Semantic| M["MMR Semantic Search"]
+    L -->|Symbol| N["AST Symbol Matching"]
 
     M --> H
     N --> I
@@ -85,6 +85,7 @@ flowchart TD
 
     J --> Q
     Q --> R["Streamlit UI"]
+```
 
 ### 🔹 Phase 1 — Repository Indexing
 
